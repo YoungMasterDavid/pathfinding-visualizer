@@ -3,6 +3,9 @@ let rows = 10;
 let cols = 10;
 let grid = [];
 
+const speedControl = document.getElementById("speedControl");
+
+
 let mode = "wall"; // Default interaction mode
 let startCell = null;
 let endCell = null;
@@ -16,44 +19,44 @@ const modeButtons = {
 };
 
 function resizeGrid() {
-    const newRows = parseInt(document.getElementById("rowsInput").value);
-    const newCols = parseInt(document.getElementById("colsInput").value);
-  
-    if (!newRows || !newCols || newRows < 5 || newCols < 5) {
-      alert("Enter valid row and column sizes (min 5).");
-      return;
-    }
-  
-    rows = newRows;
-    cols = newCols;
-    createGrid();
-    startCell = null;
-    endCell = null;
+  const newRows = parseInt(document.getElementById("rowsInput").value);
+  const newCols = parseInt(document.getElementById("colsInput").value);
+
+  if (!newRows || !newCols || newRows < 5 || newCols < 5) {
+    alert("Enter valid row and column sizes (min 5).");
+    return;
   }
+
+  rows = newRows;
+  cols = newCols;
+  createGrid();
+  startCell = null;
+  endCell = null;
+}
   
 
 // Create grid
 function createGrid() {
-    grid = [];
-    gridElement.innerHTML = "";
-  
-    // Set the number of columns dynamically in the CSS grid
-    gridElement.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
-  
-    for (let row = 0; row < rows; row++) {
-      let rowArr = [];
-      for (let col = 0; col < cols; col++) {
-        const cell = document.createElement("div");
-        cell.classList.add("cell");
-        cell.dataset.row = row;
-        cell.dataset.col = col;
-        cell.addEventListener("click", () => handleCellClick(cell));
-        gridElement.appendChild(cell);
-        rowArr.push(cell);
-      }
-      grid.push(rowArr);
+  grid = [];
+  gridElement.innerHTML = "";
+
+  // Set the number of columns dynamically in the CSS grid
+  gridElement.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
+
+  for (let row = 0; row < rows; row++) {
+    let rowArr = [];
+    for (let col = 0; col < cols; col++) {
+      const cell = document.createElement("div");
+      cell.classList.add("cell");
+      cell.dataset.row = row;
+      cell.dataset.col = col;
+      cell.addEventListener("click", () => handleCellClick(cell));
+      gridElement.appendChild(cell);
+      rowArr.push(cell);
     }
+    grid.push(rowArr);
   }
+}
   
 
 function handleCellClick(cell) {
@@ -76,85 +79,85 @@ function handleCellClick(cell) {
 
 // Pathfinding algorithm (A* algorithm)
 function runPathfinding() {
-    const openSet = [startCell];
-    const cameFrom = new Map();
-    const gScore = new Map();
-    const fScore = new Map();
-  
-    for (let row of grid) {
-      for (let cell of row) {
-        gScore.set(cell, Infinity);
-        fScore.set(cell, Infinity);
-      }
+  const openSet = [startCell];
+  const cameFrom = new Map();
+  const gScore = new Map();
+  const fScore = new Map();
+
+  for (let row of grid) {
+    for (let cell of row) {
+      gScore.set(cell, Infinity);
+      fScore.set(cell, Infinity);
     }
-  
-    gScore.set(startCell, 0);
-    fScore.set(startCell, heuristic(startCell, endCell));
-  
-    function reconstructPath(current) {
-      const path = [];
-      while (cameFrom.has(current)) {
-        path.push(current);
-        current = cameFrom.get(current);
-      }
-      return path.reverse();
+  }
+
+  gScore.set(startCell, 0);
+  fScore.set(startCell, heuristic(startCell, endCell));
+
+  function reconstructPath(current) {
+    const path = [];
+    while (cameFrom.has(current)) {
+      path.push(current);
+      current = cameFrom.get(current);
     }
-  
-    function step() {
-      if (openSet.length === 0) {
-        alert("No path found.");
-        return;
-      }
-  
-      // Get the cell in openSet with the lowest fScore
-      openSet.sort((a, b) => fScore.get(a) - fScore.get(b));
-      const current = openSet.shift();
-  
-      if (current !== startCell && current !== endCell) {
-        current.classList.add("visited");
-      }
-  
-      if (current === endCell) {
-        const path = reconstructPath(current);
-        animatePath(path);
-        return;
-      }
-  
-      const neighbors = getNeighbors(current);
-      for (let neighbor of neighbors) {
-        const tentativeG = gScore.get(current) + 1; // All edges cost 1
-  
-        if (tentativeG < gScore.get(neighbor)) {
-          cameFrom.set(neighbor, current);
-          gScore.set(neighbor, tentativeG);
-          fScore.set(neighbor, tentativeG + heuristic(neighbor, endCell));
-  
-          if (!openSet.includes(neighbor)) {
-            openSet.push(neighbor);
-          }
+    return path.reverse();
+  }
+
+  function step() {
+    if (openSet.length === 0) {
+      alert("No path found.");
+      return;
+    }
+
+    // Get the cell in openSet with the lowest fScore
+    openSet.sort((a, b) => fScore.get(a) - fScore.get(b));
+    const current = openSet.shift();
+
+    if (current !== startCell && current !== endCell) {
+      current.classList.add("visited");
+    }
+
+    if (current === endCell) {
+      const path = reconstructPath(current);
+      animatePath(path);
+      return;
+    }
+
+    const neighbors = getNeighbors(current);
+    for (let neighbor of neighbors) {
+      const tentativeG = gScore.get(current) + 1; // All edges cost 1
+
+      if (tentativeG < gScore.get(neighbor)) {
+        cameFrom.set(neighbor, current);
+        gScore.set(neighbor, tentativeG);
+        fScore.set(neighbor, tentativeG + heuristic(neighbor, endCell));
+
+        if (!openSet.includes(neighbor)) {
+          openSet.push(neighbor);
         }
       }
-  
-      setTimeout(step, 30); // Animate with delay
     }
-  
-    step(); // Start the algorithm
+
+    setTimeout(step, parseInt(speedControl.value));// Animate with delay
   }
+
+  step(); // Start the algorithm
+}
   
-  function animatePath(path) {
-    let i = 0;
-    function animate() {
-      if (i >= path.length) return;
-      const cell = path[i];
-      if (cell !== startCell && cell !== endCell) {
-        cell.classList.remove("visited");
-        cell.classList.add("path");
-      }
-      i++;
-      setTimeout(animate, 50);
+function animatePath(path) {
+  let i = 0;
+  function animate() {
+    if (i >= path.length) return;
+    const cell = path[i];
+    if (cell !== startCell && cell !== endCell) {
+      cell.classList.remove("visited");
+      cell.classList.add("path");
     }
-    animate();
+    i++;
+    setTimeout(animate, parseInt(speedControl.value));
   }
+  animate();
+}
   
 
 // Handle mode switching
@@ -178,40 +181,40 @@ modeButtons.findPath.addEventListener("click", () => {
 });
 
 function getCellPosition(cell) {
-    return {
-      row: parseInt(cell.dataset.row),
-      col: parseInt(cell.dataset.col)
-    };
-  }
+  return {
+    row: parseInt(cell.dataset.row),
+    col: parseInt(cell.dataset.col)
+  };
+}
   
-  function getNeighbors(cell) {
-    const { row, col } = getCellPosition(cell);
-    const deltas = [
-      [0, 1], [1, 0], [0, -1], [-1, 0], // 4 directions
-    ];
-  
-    const neighbors = [];
-  
-    for (let [dx, dy] of deltas) {
-      const newRow = row + dx;
-      const newCol = col + dy;
-  
-      if (newRow >= 0 && newRow < rows && newCol >= 0 && newCol < cols) {
-        const neighbor = grid[newRow][newCol];
-        if (!neighbor.classList.contains("wall")) {
-          neighbors.push(neighbor);
-        }
+function getNeighbors(cell) {
+  const { row, col } = getCellPosition(cell);
+  const deltas = [
+    [0, 1], [1, 0], [0, -1], [-1, 0], // 4 directions
+  ];
+
+  const neighbors = [];
+
+  for (let [dx, dy] of deltas) {
+    const newRow = row + dx;
+    const newCol = col + dy;
+
+    if (newRow >= 0 && newRow < rows && newCol >= 0 && newCol < cols) {
+      const neighbor = grid[newRow][newCol];
+      if (!neighbor.classList.contains("wall")) {
+        neighbors.push(neighbor);
       }
     }
-  
-    return neighbors;
   }
+
+  return neighbors;
+}
   
-  function heuristic(a, b) {
-    const posA = getCellPosition(a);
-    const posB = getCellPosition(b);
-    return Math.abs(posA.row - posB.row) + Math.abs(posA.col - posB.col); // Manhattan distance
-  }
+function heuristic(a, b) {
+  const posA = getCellPosition(a);
+  const posB = getCellPosition(b);
+  return Math.abs(posA.row - posB.row) + Math.abs(posA.col - posB.col); // Manhattan distance
+}
   
 
 // Call initially to draw the grid

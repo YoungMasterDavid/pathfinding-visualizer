@@ -19,6 +19,13 @@
   <label>Rows: <input type="number" id="rowsInput" value="10" min="5" max="50"></label>
   <label>Cols: <input type="number" id="colsInput" value="10" min="5" max="50"></label>
   <button onclick="resizeGrid()">Resize Grid</button>
+  <label for="speedControl">Speed:</label>
+  <select id="speedControl">
+    <option value="100">Slow</option>
+    <option value="50" selected>Medium</option>
+    <option value="10">Fast</option>
+  </select>
+
 
   <div id="grid" class="grid"></div>
 
