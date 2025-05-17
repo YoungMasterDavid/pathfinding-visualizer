@@ -1,6 +1,6 @@
 const gridElement = document.getElementById("grid");
-const ROWS = 10;
-const COLS = 10;
+let rows = 10;
+let cols = 10;
 let grid = [];
 
 let mode = "wall"; // Default interaction mode
@@ -15,25 +15,46 @@ const modeButtons = {
   findPath: document.getElementById("findPath"),
 };
 
+function resizeGrid() {
+    const newRows = parseInt(document.getElementById("rowsInput").value);
+    const newCols = parseInt(document.getElementById("colsInput").value);
+  
+    if (!newRows || !newCols || newRows < 5 || newCols < 5) {
+      alert("Enter valid row and column sizes (min 5).");
+      return;
+    }
+  
+    rows = newRows;
+    cols = newCols;
+    createGrid();
+    startCell = null;
+    endCell = null;
+  }
+  
+
 // Create grid
 function createGrid() {
-  grid = [];
-  gridElement.innerHTML = "";
-
-  for (let row = 0; row < ROWS; row++) {
-    let rowArr = [];
-    for (let col = 0; col < COLS; col++) {
-      const cell = document.createElement("div");
-      cell.classList.add("cell");
-      cell.dataset.row = row;
-      cell.dataset.col = col;
-      cell.addEventListener("click", () => handleCellClick(cell));
-      gridElement.appendChild(cell);
-      rowArr.push(cell);
+    grid = [];
+    gridElement.innerHTML = "";
+  
+    // Set the number of columns dynamically in the CSS grid
+    gridElement.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
+  
+    for (let row = 0; row < rows; row++) {
+      let rowArr = [];
+      for (let col = 0; col < cols; col++) {
+        const cell = document.createElement("div");
+        cell.classList.add("cell");
+        cell.dataset.row = row;
+        cell.dataset.col = col;
+        cell.addEventListener("click", () => handleCellClick(cell));
+        gridElement.appendChild(cell);
+        rowArr.push(cell);
+      }
+      grid.push(rowArr);
     }
-    grid.push(rowArr);
   }
-}
+  
 
 function handleCellClick(cell) {
   if (mode === "start") {
@@ -175,7 +196,7 @@ function getCellPosition(cell) {
       const newRow = row + dx;
       const newCol = col + dy;
   
-      if (newRow >= 0 && newRow < ROWS && newCol >= 0 && newCol < COLS) {
+      if (newRow >= 0 && newRow < rows && newCol >= 0 && newCol < cols) {
         const neighbor = grid[newRow][newCol];
         if (!neighbor.classList.contains("wall")) {
           neighbors.push(neighbor);
