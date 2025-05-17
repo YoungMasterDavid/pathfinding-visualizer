@@ -233,6 +233,74 @@ function heuristic(a, b) {
   return Math.abs(posA.row - posB.row) + Math.abs(posA.col - posB.col); // Manhattan distance
 }
   
+function saveGridToLocalStorage() {
+  const gridData = grid.map(row =>
+    row.map(cell => ({
+      weight: cell.dataset.weight,
+      isWall: cell.classList.contains("wall"),
+      isStart: cell.classList.contains("start"),
+      isEnd: cell.classList.contains("end")
+    }))
+  );
+
+  const gridState = {
+    rows,
+    cols,
+    gridData
+  };
+
+  localStorage.setItem("savedGrid", JSON.stringify(gridState));
+  alert("Grid saved!");
+}
+
+function loadGridFromLocalStorage() {
+  const saved = localStorage.getItem("savedGrid");
+  if (!saved) {
+    alert("No saved grid found.");
+    return;
+  }
+
+  const { rows: savedRows, cols: savedCols, gridData } = JSON.parse(saved);
+  rows = savedRows;
+  cols = savedCols;
+  createGrid(); // Re-create grid with new dimensions
+
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
+      const cell = grid[r][c];
+      const data = gridData[r][c];
+      cell.dataset.weight = data.weight;
+      cell.textContent = data.weight !== "1" ? data.weight : "";
+      
+      cell.classList.remove("wall", "start", "end", "weight");
+
+      if (data.isWall) cell.classList.add("wall");
+      if (data.isStart) {
+        cell.classList.add("start");
+        startCell = cell;
+      }
+      if (data.isEnd) {
+        cell.classList.add("end");
+        endCell = cell;
+      }
+      if (data.weight !== "1") cell.classList.add("weight");
+    }
+  }
+
+  alert("Grid loaded!");
+}
+
+function undoPath() {
+  for (let row of grid) {
+    for (let cell of row) {
+      cell.classList.remove("visited", "path");
+    }
+  }
+}
+
 
 // Call initially to draw the grid
 createGrid();
+document.getElementById("undoPath").addEventListener("click", undoPath);
+document.getElementById("saveGrid").addEventListener("click", saveGridToLocalStorage);
+document.getElementById("loadGrid").addEventListener("click", loadGridFromLocalStorage);

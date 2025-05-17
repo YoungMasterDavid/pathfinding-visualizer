@@ -9,12 +9,18 @@
 <body>
   <h1>Pathfinding Visualizer (A*)</h1>
 
+  <button id="saveGrid">Save Grid</button>
+  <button id="loadGrid">Load Grid</button>
+  <button onclick="localStorage.removeItem('savedGrid'); alert('Saved grid cleared.')">Clear Saved Grid</button>
+
   <div class="controls">
     <button id="setStart">Set Start</button>
     <button id="setEnd">Set End</button>
     <button id="addWall">Add Wall</button>
     <button id="findPath">Find Path</button>
     <button id="reset">Reset</button>
+    <button id="undoPath">Undo Path</button>
+    <button id="setWeight">Set Weight</button>
   </div>
   <label>Rows: <input type="number" id="rowsInput" value="10" min="5" max="50"></label>
   <label>Cols: <input type="number" id="colsInput" value="10" min="5" max="50"></label>
@@ -25,7 +31,6 @@
     <option value="50" selected>Medium</option>
     <option value="10">Fast</option>
   </select>
-  <button id="setWeight">Set Weight</button>
 
   <div id="grid" class="grid"></div>
 
