@@ -49,6 +49,11 @@ body {
   .cell.path {
     background-color: yellow;
   }
+  .cell.weight {
+    background-color: orange;
+    color: white;
+    font-weight: bold;
+  }
   
 
   

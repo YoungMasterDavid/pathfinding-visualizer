@@ -5,7 +5,6 @@ let grid = [];
 
 const speedControl = document.getElementById("speedControl");
 
-
 let mode = "wall"; // Default interaction mode
 let startCell = null;
 let endCell = null;
@@ -16,7 +15,13 @@ const modeButtons = {
   addWall: document.getElementById("addWall"),
   reset: document.getElementById("reset"),
   findPath: document.getElementById("findPath"),
+  setWeight: document.getElementById("setWeight"),
 };
+
+modeButtons.setWeight.addEventListener("click", () => {
+  mode = "weight";
+});
+
 
 function resizeGrid() {
   const newRows = parseInt(document.getElementById("rowsInput").value);
@@ -50,6 +55,7 @@ function createGrid() {
       cell.classList.add("cell");
       cell.dataset.row = row;
       cell.dataset.col = col;
+      cell.dataset.weight = "1"; // default weight
       cell.addEventListener("click", () => handleCellClick(cell));
       gridElement.appendChild(cell);
       rowArr.push(cell);
@@ -74,8 +80,18 @@ function handleCellClick(cell) {
     if (!cell.classList.contains("start") && !cell.classList.contains("end")) {
       cell.classList.toggle("wall");
     }
+  } else if (mode === "weight") {
+    if (!cell.classList.contains("start") && !cell.classList.contains("end") && !cell.classList.contains("wall")) {
+      const weight = prompt("Enter weight (e.g., 1-10):", cell.dataset.weight);
+      if (weight !== null && !isNaN(weight) && Number(weight) >= 1) {
+        cell.dataset.weight = weight;
+        cell.textContent = weight; // Show weight visually
+        cell.classList.add("weight"); // Optional style
+      }
+    }
   }
 }
+
 
 // Pathfinding algorithm (A* algorithm)
 function runPathfinding() {
@@ -125,7 +141,8 @@ function runPathfinding() {
 
     const neighbors = getNeighbors(current);
     for (let neighbor of neighbors) {
-      const tentativeG = gScore.get(current) + 1; // All edges cost 1
+      const weight = parseInt(neighbor.dataset.weight) || 1;
+      const tentativeG = gScore.get(current) + weight;
 
       if (tentativeG < gScore.get(neighbor)) {
         cameFrom.set(neighbor, current);
